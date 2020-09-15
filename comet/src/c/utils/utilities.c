@@ -104,7 +104,7 @@ void convert_int_array_to_pylist(int len, PyObject *pyArr, int *arr) {
         memset(arr, 0, sizeof(int) * len);
     }
     for (j=0; j < len; j++) {
-        PyList_SET_ITEM(pyArr, j, PyInt_FromLong(arr[j]));
+        PyList_SET_ITEM(pyArr, j, PyLong_FromLong(arr[j]));
     }
 }
 /* Converts an array into a PyObject of type PyList */

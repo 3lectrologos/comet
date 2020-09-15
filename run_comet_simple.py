@@ -177,7 +177,7 @@ def run( args ):
 
     ###########################################################################
     if args.verbose:
-        print 'Mutation data: %s genes x %s patients' % (m, n)
+        print(f'Mutation data: {m} genes x {n} patients')
 
     if args.core_events:
         with open(args.core_events) as f:
@@ -210,7 +210,7 @@ def run( args ):
                 lastSolns.append(lastSoln)
 
             finalTv = C.discrete_convergence(totalOut, int(N/s))
-            print finalTv, N
+            print(finalTv, N)
 
             newN = int(N*NInc)
             if newN > NStop or finalTv < args.total_distance_cutoff:

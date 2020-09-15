@@ -77,7 +77,7 @@ def load_mutation_data(filename, patientFile=None, geneFile=None, minFreq=0, sub
         genes.remove(g)
 
     # Format and return output
-    genes, patients = geneToCases.keys(), patientToGenes.keys()
+    genes, patients = list(geneToCases.keys()), list(patientToGenes.keys())
     m, n = len(genes), len(patients)
     return m, n, genes, patients, geneToCases, patientToGenes, subtypes
 
@@ -86,8 +86,8 @@ def adj_dict_to_lists(xs, ys, d):
     """Convert a dictionary of x -> y to a list of lists, where
        each x corresponds to a list of indices of y."""
     M = []
-    for x, y_list in d.iteritems():
-        M.append( [ ys.index(y) for y in y_list ] )
+    for x, y_list in d.items():
+        M.append( [ list(ys).index(y) for y in y_list ] )
     return M
 
 def convert_mutations_to_C_format(m, n, genes, patients, geneToCases, patientToGenes, subtypes=None):

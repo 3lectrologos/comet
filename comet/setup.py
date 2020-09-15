@@ -15,7 +15,7 @@ def subprocessOutput(args):
     proc = subprocess.Popen(args, stdout=subprocess.PIPE)
     out, err = proc.communicate()
     try: return out
-    except: print "Error: " + err
+    except: print("Error: " + err)
 
 compile_args = ['-g', '-O0']
 

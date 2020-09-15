@@ -39,9 +39,9 @@ def discrete_convergence_eqb_plot(filelist, num_genes, ks_set, outprefix):
     start_interval = start_plot_index % interval_point
     start_plot_index += start_interval
 
-    print "Interval point:", interval_point
-    print "Last n:", last_eqb
-    print "Start plot index:", start_plot_index
+    print("Interval point:", interval_point)
+    print("Last n:", last_eqb)
+    print("Start plot index:", start_plot_index)
         
     for i in range(start_plot_index, s_length, interval_point):
     #for i in range(last_eqb, s_length):

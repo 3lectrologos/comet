@@ -325,12 +325,12 @@ PyObject *py_comet(PyObject *self, PyObject *args){
 
       geneset = PyList_New(ks_c[j]+2); // plus tw for weight and function
       for (ell = 0; ell < ks_c[j]; ell++){
-        val = PyInt_FromLong((long) gene_sets[i][group_index_sum[j] + ell]);
+        val = PyLong_FromLong((long) gene_sets[i][group_index_sum[j] + ell]);
         PyList_SET_ITEM(geneset, ell, val);
       }
       val = PyFloat_FromDouble(weights[i][j]);
       PyList_SET_ITEM(geneset, ks_c[j], val);
-      PyList_SET_ITEM(geneset, ks_c[j]+1, PyInt_FromLong((long)functions[i][j]));
+      PyList_SET_ITEM(geneset, ks_c[j]+1, PyLong_FromLong((long)functions[i][j]));
       PyList_SET_ITEM(soln, j, geneset);
 
     }
@@ -370,9 +370,16 @@ PyMethodDef CoMEtMethods[] = {
     {NULL, NULL, 0, NULL},
 };
 
-PyMODINIT_FUNC initcComet(void) {
-    PyObject *m = Py_InitModule("cComet", CoMEtMethods);
-    if (m == NULL) {
-        return;
-    }
+static struct PyModuleDef cModPyDem =
+  {
+    PyModuleDef_HEAD_INIT,
+    "cComet", /* name of module */
+    "",          /* module documentation, may be NULL */
+    -1,          /* size of per-interpreter state of the module, or -1 if the module keeps state in global variables. */
+    CoMEtMethods
+  };
+
+PyMODINIT_FUNC PyInit_cComet(void)
+{
+  return PyModule_Create(&cModPyDem);
 }

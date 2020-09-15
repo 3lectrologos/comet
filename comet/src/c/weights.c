@@ -13,7 +13,8 @@ void derive_remaining_cells(int k, int N, int *margins, int *ex_cells, int *tbl,
 int min_affected_margin(int k, int cell, int *mar_rems);
 int exact_test_helper(double *pval, int *num_tbls, int k, double pvalthresh, int num_entries,
                       int N, double numerator, int *margins, int *ex_cells, int *co_cells,
-                      int num_co_cells, int *tbl, int **mar_stack, int co_in, int T_rem, int T_obs);
+                      int num_co_cells, int *tbl, int **mar_stack, int co_in, int T_rem, int T_obs,
+		      time_t start);
 
 // Constants for 
 static double const OVER_THRESH  = -1;
@@ -217,7 +218,14 @@ int contains_negative(int *arr, int len){
 
 int exact_test_helper(double *pval, int *num_tbls, int k, double pvalthresh, int num_entries,
                       int N, double numerator, int *margins, int *ex_cells, int *co_cells,
-                      int num_co_cells, int *tbl, int **mar_stack, int co_in, int T_rem, int T_obs){
+                      int num_co_cells, int *tbl, int **mar_stack, int co_in, int T_rem, int T_obs,
+		      time_t start){
+  time_t now;
+  time(&now);
+  if ((double) (now - start) >= 2.0) {
+    return OVER_THRESH;
+  }
+  
   int res = UNDER_THRESH;
   if (co_in >= num_co_cells){
     derive_remaining_cells( k, N, margins, ex_cells, tbl, mar_stack[co_in] );
@@ -258,7 +266,7 @@ int exact_test_helper(double *pval, int *num_tbls, int k, double pvalthresh, int
       tbl[cell] = val;
       res = exact_test_helper( pval, num_tbls, k, pvalthresh, num_entries, N, numerator,
                                margins, ex_cells, co_cells, num_co_cells, tbl,
-                               mar_stack, co_in + 1, T_rem-coef*val, T_obs);
+                               mar_stack, co_in + 1, T_rem-coef*val, T_obs, start);
       if (res < 0) {
         break;
       }
@@ -306,11 +314,12 @@ double comet_exact_test(int k, int N, int *ctbl, int *final_num_tbls, double pva
     // Initialize margin stack
     mar_stack[0][i] = margins[i+k];
   }
-  
+
   // Numerator
   numerator = 0.0;
-  for (i = 0; i < 2*k; i++) numerator += lnfacs[margins[i]];
-  
+  for (i = 0; i < 2*k; i++){
+    numerator += lnfacs[margins[i]];
+  }
   // Observed
   Tobs = sum_cells(ctbl, ex_cells, k);
   kbar = 0;
@@ -327,12 +336,13 @@ double comet_exact_test(int k, int N, int *ctbl, int *final_num_tbls, double pva
   
   // Construct a blank table to start with
   blank_tbl = malloc(sizeof(int) * num_entries);
-  
   // Run the exact test recursion which will update the results array
   // with the number of extreme tables and the pval
+  time_t start;
+  time(&start);
   res = exact_test_helper( pval, num_tbls, k, pvalthresh, num_entries, N, numerator,
                            margins, ex_cells, co_cells, num_co_cells, blank_tbl,
-                           mar_stack, 0, T, Tobs);
+                           mar_stack, 0, T, Tobs, start);
   
   *final_num_tbls = num_tbls[0];
   final_p_value = (pval[0]+pval[1])/2;

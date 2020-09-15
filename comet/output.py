@@ -71,28 +71,28 @@ def output_comet_viz(args, mutations, resultsTable, maxPermutedWeight, permutedN
 
 	###########################################################################
 	# Construct marginal probability graph from the input CoMEt results file
-	if args.verbose: print "* Constructing marginal probability graph..."
+	if args.verbose: print("* Constructing marginal probability graph...")
 
 	res = construct_mp_graph( resultsTable, eventNames, msf, maxPermutedWeight )
 	MPG, tables, expectedPoint = res
 	edges = MPG.edges(data=True)
 
 	if len(edges) == 0: # no significant results
-		print "No significant collection. "
+		print("No significant collection. ")
 		exit(1)
 		
-	if args.verbose: print "\t- Edges:", len(edges)
+	if args.verbose: print("\t- Edges:", len(edges))
 
 	# Choose delta (the minimum edge weight in the marginal probability 
 	# graph ) using a heuristic approach that selects delta at first elbow
 	# with slope change > 0 using linear regression
-	if args.verbose: print "* Choosing delta..."
+	if args.verbose: print("* Choosing delta...")
 
 	deltas = sorted(set( d['weight'] for u, v, d in MPG.edges(data=True)))
 	realEdgeDist = compute_edge_dist(MPG, deltas)
 	deltaPoint, edgeno = choose_delta(deltas, realEdgeDist, expectedPoint, sec)
 
-	if args.verbose: print "\t- Delta: ", deltaPoint
+	if args.verbose: print("\t- Delta: ", deltaPoint)
 
 	###########################################################################
 	# Create the web output
@@ -100,7 +100,7 @@ def output_comet_viz(args, mutations, resultsTable, maxPermutedWeight, permutedN
 
 	# Write the delta plot to file as an SVG, then load
 	# it so we can embed it in the web page
-	if args.verbose: print "* Plotting delta curve..."
+	if args.verbose: print("* Plotting delta curve...")
 	tmp = tempfile.mktemp(".svg", dir=".", prefix=".tmp")
 	delta_plot(permutedN, deltas, realEdgeDist, tmp, expectedPoint, deltaPoint, edgeno)
 
@@ -111,7 +111,7 @@ def output_comet_viz(args, mutations, resultsTable, maxPermutedWeight, permutedN
 	stats = dict(deltas=[dict(delta=deltaPoint, pval=0.)], plot=plot, N=permutedN)
 
 	# Combine everything to create the D3 data
-	if args.verbose: print "* Creating GD3 data..."
+	if args.verbose: print("* Creating GD3 data...")
 	graphData = gd3_graph(MPG, eventNames, mew)
 	genesInResults = MPG.nodes()
 	sampleToType = None
@@ -122,7 +122,7 @@ def output_comet_viz(args, mutations, resultsTable, maxPermutedWeight, permutedN
 								  eventNames=eventNames, sampleToType=sampleToType)
 
 	# Output the results to an HTML file
-	if args.verbose: print "* Outputting..."
+	if args.verbose: print("* Outputting...")
 	htmlOutput = "{}/index.html".format(vizOutput)
 	with open(args.template_file) as template, open(htmlOutput, "w") as outfile:
 		jsonData = json.dumps( dict(graph=graphData, mutations=mutations, tables=tables, stats=stats))
@@ -203,7 +203,7 @@ def choose_delta( deltas, realDist, expectedPoint, stdCutoff):
 			break
 
 	if len(logX) <= 3: # less and equal than three edge weights => can't do regression method. Output smallest edge.
-		print "At most three edge weights in the marginal probability graph. Using the smallest edge weight as Delta..."
+		print("At most three edge weights in the marginal probability graph. Using the smallest edge weight as Delta...")
 		return deltas[0], realDist[0]
 
 	lastSlope = 0.
@@ -232,7 +232,7 @@ def choose_delta( deltas, realDist, expectedPoint, stdCutoff):
 				break
 
 		if iS == 0 and lastSlopeI == None: # no elbow point
-			print "No elbow point found! Try to lower the standard error cutoff with -rmse < ", stdCutoff
+			print("No elbow point found! Try to lower the standard error cutoff with -rmse < ", stdCutoff)
 			exit(1)
 
 		
@@ -245,7 +245,7 @@ def choose_delta( deltas, realDist, expectedPoint, stdCutoff):
 				break
 			else:
 				if iS == 0: # can't find L elbow point after searching all points.
-					print "Can't find L (outer) elbow point! Report the last inner elbow point as delta."
+					print("Can't find L (outer) elbow point! Report the last inner elbow point as delta.")
 					break
 				lastSlope = (logY[i] - logY[iS + 1]) / (logX[i] - logX[iS + 1])
 				lastSlopeI = iS + 1
@@ -293,10 +293,10 @@ def gd3_mutation_data(m, n, genes, patients, geneToCases, patientToGenes,
 	# Sample information (TODO: More elegant solution later)
 	if sampleToType:
 		typeToSamples = dict( (t, set()) for t in set(sampleToType.values()))
-		for sample, ty in sampleToType.iteritems():
+		for sample, ty in sampleToType.items():
 			if sample in patients:
 				typeToSamples[ty].add( sample )
-		typeToSamples = dict( (t, list(s)) for t, s in typeToSamples.iteritems() )
+		typeToSamples = dict( (t, list(s)) for t, s in typeToSamples.items() )
 		sampleToTypes = sampleToType
 	else:
 		typeToSamples = dict(Cancer=patients)
@@ -322,7 +322,7 @@ def gd3_mutation_data(m, n, genes, patients, geneToCases, patientToGenes,
 	return dict(M=M, sampleToTypes=sampleToTypes, typeToSamples=typeToSamples)
 
 def gd3_graph(MPG, eventNames, minEdgeWeight):
-	nodes = MPG.nodes()
+	nodes = list(MPG.nodes())
 	edges = [ dict(source=nodes.index(u), target=nodes.index(v), weight=d['weight'])
 			  for u, v, d in MPG.edges(data=True) if d['weight'] >= minEdgeWeight ]
 	edges.sort(key=lambda d: d['weight'], reverse=True)
@@ -359,6 +359,11 @@ def construct_mp_graph(resultsTable, eventNames, minSamplingFreq, maxPWeight):
 		if freq >= minSamplingFreq:
 			tables.append(create_table_row(arr, eventNames))
 
+	import pickle
+	with open('cometresult.pcl', 'wb') as fout:
+		pickle.dump(geneSets, fout)
+
+	print('RESULT:', geneSets)
 	# After loading the sets that will go into the graph,
 	# compute edges between each pair of genes.
 	edges = defaultdict(float)
@@ -370,7 +375,7 @@ def construct_mp_graph(resultsTable, eventNames, minSamplingFreq, maxPWeight):
 					edges[frozenset([g1, g2])] += freq/N
 
 	# Create a graph from the edge list
-	mpgEdges = [ (list(S)[0], list(S)[1], dict(weight=w)) for S, w in edges.iteritems()  ]
+	mpgEdges = [ (list(S)[0], list(S)[1], dict(weight=w)) for S, w in edges.items()  ]
 	MPG = nx.Graph()
 	MPG.add_edges_from(mpgEdges)
 

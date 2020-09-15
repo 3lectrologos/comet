@@ -119,13 +119,13 @@ def run( args ):
     m, n, genes, patients, geneToCases, patientToGenes, subtypes = realMutations
 
     if args.verbose:
-        print '* Mutation data: %s genes x %s patients' % (m, n)
+        print(f'* Mutation data: {m} genes x {n} patients')
 
     # Construct bipartite graph from mutation data
-    if args.verbose: print "* Creating bipartite graph..."
+    if args.verbose: print('* Creating bipartite graph...')
     G = C.construct_mutation_graph(geneToCases, patientToGenes)
     if args.verbose:
-        print '\t- Graph has', len( G.edges() ), 'edges among', len( G.nodes() ), 'nodes.'
+        print('\t- Graph has', len( G.edges() ), 'edges among', len( G.nodes() ), 'nodes.')
 
     # reset the arguments for a general CoMEt run on permuted matrices
     cometArgs = []
@@ -161,7 +161,7 @@ def run( args ):
         with open(permutation_file, 'w') as outfile: outfile.write('\n'.join(adj_list))
 
         # Add the new arguments
-        permuteArgs = map(str, cometArgs)
+        permuteArgs = list(map(str, cometArgs))
         permuteArgs += [ "-m", permutation_file ]
         permuteArgs += [ "-o", "{}/comet-results-on-permutation-{}".format(directory, i+1)]
         arguments.append( permuteArgs )
@@ -186,9 +186,9 @@ def run( args ):
                     if score > maxStat:
                         maxStat = score
 
-    print "*" * 80
-    print "Number of permutations:", args.num_permutations
-    print "Max statistic:", maxStat
+    print("*" * 80)
+    print("Number of permutations:", args.num_permutations)
+    print("Max statistic:", maxStat)
 
     # Prepare comet results on real, mutation data, and output directory for viz
     for rf in [rf for rf in os.listdir( "{}/results/".format(realOutputDir) ) if rf.endswith(".tsv")]:
