@@ -273,6 +273,7 @@ PyObject *py_comet(PyObject *self, PyObject *args){
   int **functions;
   PyObject *solns, *soln, *val, *geneset, *initial_soln;
   PyObject *patients2mutatedGenes, *gene2numMutations, *ks;
+  HASH_CLEAR(hh, weightHash);
   /* Parse Python arguments */
   if (! PyArg_ParseTuple( args, "iiiO!O!O!iiiidO!idi", &t, &numGenes, &numPatients,
                           &PyList_Type, &patients2mutatedGenes, &PyList_Type, &gene2numMutations, &PyList_Type, &ks,
