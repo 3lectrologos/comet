@@ -71,26 +71,11 @@ function choice(dist, n, p) result(i)
   integer, intent(in) ::  n
   double precision, intent(in) :: dist(n)
   double precision, intent(in) :: p
-  integer :: i, j
+  integer :: i
 
-  i = n/2
-  j = n/4
-
-  do while (j>0)
-    if (dist(i)<p) then
-      i = i+j
-    else
-      i = i-j
-    end if
-    j = j/2
-  end do
-
-  do while (i<n .and. dist(i+1)<=p)
+  i = 1
+  do while (i<=n .and. dist(i)<p)
     i = i+1
-  end do
-
-  do while (i>1 .and. dist(i-1)>p)
-    i = i-1
   end do
 
 end function choice
