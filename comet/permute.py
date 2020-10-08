@@ -33,13 +33,11 @@ def bipartite_double_edge_swap(G, genes, patients, nswap=1, max_tries=1e75):
     # Instead of choosing uniformly at random from a generated edge list,
     # this algorithm chooses nonuniformly from the set of nodes with
     # probability weighted by degree.
-    print('nswap =', nswap)
     n=0
     swapcount=0
     keys,degrees=zip(*dict(G.degree).items()) # keys, degree
     cdf=nx.utils.cumulative_distribution(degrees)  # cdf of degree
     while swapcount < nswap:
-        print('====', [list(G[x]) for x in genes])
         # pick two random edges without creating edge list
         # choose source node indices from discrete distribution
         (ui,xi)=nx.utils.discrete_sequence(2,cdistribution=cdf)
@@ -66,19 +64,12 @@ def bipartite_double_edge_swap(G, genes, patients, nswap=1, max_tries=1e75):
             G.remove_edge(gene1,patient2)
             G.remove_edge(patient1, gene2)
             swapcount+=1
-            if gene1 == 0 and patient1 == 5:
-                print('check')
-                print(gene1, patient1, '--', G[patient1])
-                print(gene2, patient2, '--', G[patient2])
-                print(gene2, patient2)
-                print('NOT')
 
         if n >= max_tries:
             e=('Maximum number of swap attempts (%s) exceeded '%n +
                'before desired swaps achieved (%s).'%nswap)
             raise nx.NetworkXAlgorithmError(e)
         n+=1
-    print('====', [list(G[x]) for x in genes])
     return G
 
 def construct_mutation_graph(geneToCases, patientToGenes):
@@ -105,18 +96,15 @@ def graph_to_mutation_data(H, genes, patients):
 
 def permute_mutation_data(G, genes, patients, seed, Q=100):
     if True:
-        print('using fortran')
         # Compute the desired pieces of the graph structure
         A = biadjacency_matrix(G, row_order=genes, column_order=patients, dtype=np.int32)
         if sp.sparse.issparse(A):
             A = A.todense()
         A = np.asarray(A, dtype=np.int32)
 
-        print('A =', A)
         # Set up and call the permute matrix function
         B = bipartite_edge_swap(A, nswap=len(G.edges())*Q + np.random.uniform(0, 100),
-                                max_tries=2**31-1, seed=seed, verbose=False)
-        print('B =', B)
+                                               max_tries=2**31-1, seed=seed, verbose=False)
         H = nx.Graph()
         H.add_nodes_from(genes + patients) # some patients/genes may have zero mutations
         H.add_edges_from([(genes[u], patients[v]) for u, v in zip(*np.where(B == 1))])
@@ -124,7 +112,6 @@ def permute_mutation_data(G, genes, patients, seed, Q=100):
         H = G.copy()
         random.seed(seed)
         bipartite_double_edge_swap(H, genes, patients, nswap=Q*len(G.edges()) + np.random.uniform(0, 100))
-        print('RESSSS ==>', [list(H[x]) for x in genes])
     return graph_to_mutation_data(H, genes, patients)
 
 
@@ -133,5 +120,5 @@ if __name__ == '__main__':
     g.add_nodes_from([1, 2, 3, 4, 5, 6])
     g.add_edges_from([(1, 4), (1, 5), (2, 4), (2, 6)])
     print(g[5])
-    res = permute_mutation_data(g, [1, 2], [3, 4, 5, 6], seed=np.random.rand(), Q=1000)
+    res = permute_mutation_data(g, [1, 2], [3, 4, 5, 6], seed=np.random.rand(), Q=100)
     print(res)
