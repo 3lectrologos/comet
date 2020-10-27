@@ -13,6 +13,7 @@ except ImportError:
     importMultidendrix = False
     sys.stderr.write("Note: The Multi-Dendrix Python module could not"\
                      " be found. Using only random initializations...\n")
+    multi_dendrix=None
 
 def get_parser():
     # Parse arguments

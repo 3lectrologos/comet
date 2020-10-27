@@ -1,0 +1,1 @@
+python run_comet_full.py -o stad_res -np 7 -m example_datasets/stad/STAD.m2 -ks 4 4 4 4 -gf example_datasets/stad/STAD.glst --subtype example_datasets/stad/STAD-subtype.lst --num_initial 2 -N 10000000 --parallel

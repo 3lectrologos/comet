@@ -191,7 +191,8 @@ def run( args ):
     print("Max statistic:", maxStat)
 
     # Prepare comet results on real, mutation data, and output directory for viz
-    for rf in [rf for rf in os.listdir( "{}/results/".format(realOutputDir) ) if rf.endswith(".tsv")]:
+    for rf in [rf for rf in os.listdir( "{}/results/".format(realOutputDir) )
+               if (not rf.startswith('.') and rf.endswith(".tsv"))]:
         resultsTable = [l.rstrip() for l in open( "{}/results/{}".format(realOutputDir, rf))]    
 
     realMutations = (m, n, genes, patients, geneToCases, patientToGenes )
