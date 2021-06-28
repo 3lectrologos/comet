@@ -102,7 +102,7 @@ def output_comet_viz(args, mutations, resultsTable, maxPermutedWeight, permutedN
 
     toremove = []
     for u, v, dat in MPG.edges.data():
-        if dat['weight'] < deltaPoint:
+        if dat['weight'] <= deltaPoint:
             toremove.append((u, v))
     MPG.remove_edges_from(toremove)
 
@@ -211,21 +211,27 @@ def choose_delta( deltas, realDist, expectedPoint, stdCutoff):
     """ Find the delta through L-elbow method """
     logY = np.log10(np.array(realDist))
     logX = np.log10(np.array(deltas)) + 1e-6*np.random.rand(len(deltas))
+    import matplotlib.pylab as plt
+    plt.plot(logX, logY, 'bo-')
+    logep = np.log10(expectedPoint)
+    plt.plot([logX[0], logX[-1]], [logep, logep], 'k--')
+    plt.show()
 
     indices = -1
     maxDiff = -1
 
     # reverse order from large edge weight, set start_i as index passing expected edges
-    startI = 0.
+    startI = 0
     for i in range(len(logX)-1, 0, -1):
         print(realDist[i], expectedPoint)
         if realDist[i] >= expectedPoint:
             startI = i
             break
+    print('startI =', startI)
 
-    if len(logX) <= 3: # less and equal than three edge weights => can't do regression method. Output smallest edge.
+    if len(logX) <= 3 or startI == 0: # less and equal than three edge weights => can't do regression method. Output smallest edge.
         print("At most three edge weights in the marginal probability graph. Using the smallest edge weight as Delta...")
-        return deltas[0], realDist[0]
+        return deltas[0]-0.1, realDist[0]
 
     lastSlope = 0.
     i = startI # i: change point
@@ -236,6 +242,7 @@ def choose_delta( deltas, realDist, expectedPoint, stdCutoff):
         for j in range(2, len(logX)):
             iS = i-j+1
             iE = i
+            print('iS, iE =', iS, iE)
             # linear regression
             regression = np.polyfit(logX[iS:iE+1] , logY[iS:iE+1], 1)
             # y=ax+b a:point_on_x, b: point_on_y
